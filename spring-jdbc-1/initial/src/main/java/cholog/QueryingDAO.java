@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public class QueryingDAO {
+public class QueryingDAO { // controller 가 아닌 DAO 객체에서 데이터베이스 다루기.
     private JdbcTemplate jdbcTemplate;
 
     public QueryingDAO(JdbcTemplate jdbcTemplate) {
@@ -16,9 +16,13 @@ public class QueryingDAO {
     }
 
     //RowMapper 인터페이스. ResultSet의 각 행을 Customer 객체로 매핑하는 데 사용되며, 'resultSet' 에서 각 열의 값을 가져와 'Customer' 객체를 생성
+
+    //람다식 -> RowMapper 인터페이스(클래스 구현)와 사용(객체 생성)을 편하게. (원래는 .. 다른 곳에서 클래스 만들어주고, 여기서 new 객체 생성해서 아래 조회할 때 객체 불러오기)
+    //resultSet 은 db의 레코드를 가져옴. 컬럼명은 id, first_name, last_name. rowNum 은 여기서 쓰이진 않지만, 조회한 레코드의 번호를 매겨주는 것.
+
     private final RowMapper<Customer> actorRowMapper = (resultSet, rowNum) -> {
         Customer customer = new Customer(
-                resultSet.getLong("id"),
+                resultSet.getLong("id"), // id는 Long 타입으로 가져온다는 뜻.
                 resultSet.getString("first_name"),
                 resultSet.getString("last_name")
         );
@@ -75,6 +79,8 @@ public class QueryingDAO {
     //RowMapper 이용.
     public List<Customer> findAllCustomers() {
         //TODO : 저장된 모든 Customers를 list형태로 반환
+
+        // 첫 번째 매개변수는 sql문, 두 번째 매개변수는 actorRowMapper. (actorRowMapper 에서 sql문에서 찾고 있는 레코드 조회)
         List<Customer> customers = jdbcTemplate.query("select id, first_name, last_name from customers where first_name = ?",
                 actorRowMapper);
 
